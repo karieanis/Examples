@@ -1,0 +1,8 @@
+In here you'll find some generic components for ETL using Hive 'TRANSFORM' and php. It contains:
+
+- Stream readers / writers
+- Standard application of ABC.co.uk traffic handling rules
+- Serializer / Deserializers
+- Hive <-> Php translation
+- Caching
+- A simple recursive object constructor (for dependency injection via configuration)

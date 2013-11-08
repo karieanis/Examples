@@ -1,0 +1,8 @@
+In here you'll find tools which can be used to facilitate client applications to connect to various Thrift Database services for Hadoop.
+
+- Hive Server 1
+- Hive Server 2
+- Impala
+
+Also, you'll find a basic implementation of Thrift SASL transport and SASL authentication as no such client code currently exists within
+Apache Thrift for Php.
