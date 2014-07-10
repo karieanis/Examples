@@ -24,9 +24,9 @@ class PropertyMap extends \Director\Lib\Util\Collection {
     /**
      * Manufacture a metadata object utilising the passed TRow object. This metadata contains a reference to the
      * appropriate value property accessor for each column.
-     * @param \TRow $row
+     * @param \apache\hive\service\cli\thrift\TRow $row
      */
-    public static function factory(\TRow $row) {
+    public static function factory(\apache\hive\service\cli\thrift\TRow $row) {
         $map = new static();
         
         foreach($row->colVals as $col) {
@@ -39,10 +39,10 @@ class PropertyMap extends \Director\Lib\Util\Collection {
     /**
      * Find the property within the passed TColumnValue which currently contains a value. The matching property type
      * will be returned.
-     * @param \TColumnValue $value
+     * @param \apache\hive\service\cli\thrift\TColumnValue $value
      * @return string
      */
-    protected static function findProperty(\TColumnValue $value) {
+    protected static function findProperty(\apache\hive\service\cli\thrift\TColumnValue $value) {
         $type = null;
         $types = static::$types;
         

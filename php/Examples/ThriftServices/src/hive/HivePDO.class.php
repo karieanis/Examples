@@ -48,7 +48,7 @@ class HivePDO {
      * @param string $password
      */
     public function __construct($dsn, $username = 'hive', $password = '') {
-        $this->logger = \Logger::getLogger('ThriftDatabaseLogger');
+        $this->logger = \Logger::getLogger('servicesLogger');
         $conf = $this->getHiveConf(
             array_merge(
                 $this->parseDsn($dsn),
@@ -71,7 +71,7 @@ class HivePDO {
      * @return \Examples\ThriftServices\Hadoop\Conf\HadoopDatabaseConf
      */
     protected function getHiveConf(array $overrides) {
-        $conf = \Examples\ThriftServices\Hadoop\Conf\HadoopDatabaseConfFactory::factory();
+        $conf = \Examples\ThriftServices\Hadoop\Service\HadoopDatabaseService::getRunningService()->getConf();
         
         foreach($overrides as $key => $value) {
             $conf[$key] = $value;
@@ -199,7 +199,7 @@ class HivePDO {
     }
    
     /**
-     * @return \TCLIServiceIf
+     * @return \apache\hive\service\cli\thrift\TCLIServiceIf
      */
     public function getClient() {
         return $this->getServiceContainer()->getClient();
@@ -211,18 +211,8 @@ class HivePDO {
      * @return array
      */
     protected function parseDsn($dsn) {
-        $parsed = array();
-        $parts = explode(";", substr($dsn, strlen("hive2:")));
-        
-        foreach($parts as $keyValuePair) {
-            $temp = explode("=", $keyValuePair);
-            
-            if(count($temp) == 2) {
-                $parsed[$temp[0]] = $temp[1];
-            }
-        }
-        
-        return $parsed;
+        $helper = new \Examples\ThriftServices\Database\Helpers\DSNHelper();
+        return $helper->parse($dsn);
     }
     
     /**
@@ -267,6 +257,7 @@ class HivePDO {
      * Clean up any open sessions and close the current transport connection
      */
     public function __destruct() {
+        $this->logger->debug("Destroying PDO, clearing existing sessions");
         $manager = Session\HiveSessionCollection::getInstance();
 
         /* @var Session\HiveSession $session */
@@ -275,6 +266,7 @@ class HivePDO {
         }
         
         $manager->clear(); // clear out
+        $this->logger->debug(sprintf("%d session(s) left in session manager", count($manager->get())));
         $this->getTransport()->close();
     }
 }

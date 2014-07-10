@@ -6,7 +6,7 @@ namespace Examples\HiveTransformETL\Translator;
  * @author Jeremy Rayner <jeremy@davros.com.au>
  * @codeCoverageIgnore
  */
-final class HiveTranslator {
+final class HiveTranslator implements ITranslatorContainer {
     /**
      * @staticvar HiveTranslator
      */
@@ -40,22 +40,16 @@ final class HiveTranslator {
         
         return self::$instance;
     }
-    
-    /**
-     * Translate incoming input using the inTranslator
-     * 
-     * @param \Examples\HiveTransformETL\Model\HiveRow $row
-     * @return \Examples\HiveTransformETL\Model\HiveRow
+
+    /* (non-PHPdoc)
+     * @see \Examples\HiveTransformETL\Translator\ITranslatorContainer::translateInput()
      */
     public function translateInput($row) {
         return $this->inTranslator->translate($row);
     }
-    
-    /**
-     * Translate the outgoing input using the outTranslator
-     * 
-     * @param \Examples\HiveTransformETL\Model\HiveRow $row
-     * @return \Examples\HiveTransformETL\Model\HiveRow
+
+    /* (non-PHPdoc)
+     * @see \Examples\HiveTransformETL\Translator\ITranslatorContainer::translateOutput()
      */
     public function translateOutput($row) {
         return $this->outTranslator->translate($row);

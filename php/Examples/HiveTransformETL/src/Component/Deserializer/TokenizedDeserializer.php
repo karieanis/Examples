@@ -1,6 +1,8 @@
 <?php
 namespace Examples\HiveTransformETL\Component\Deserializer;
 
+use Examples\HiveTransformETL\Decoder\TokenizedDecoder;
+
 /**
  * A deserialization implementation utilising tokens
  * @author Jeremy Rayner <jeremy@davros.com.au>
@@ -12,7 +14,16 @@ class TokenizedDeserializer implements IDeserializer {
      * @var string
      */
     protected $token;
-
+    /**
+     * 
+     * @var TokenizedDecoder
+     */
+    protected $decoder;
+    
+    public function __construct() {
+        $this->decoder = TokenizedDecoder::instance();
+    }
+    
     /**
      * 
      * @return \Examples\HiveTransformETL\Component\Deserializer\TokenizedDeserializer
@@ -43,6 +54,6 @@ class TokenizedDeserializer implements IDeserializer {
      * @see \Examples\HiveTransformETL\Component\Deserializer\IDeserializer::deserialize()
      */
     public function deserialize($input) {
-        return explode($this->getToken(), $input);
+        return $this->decoder->decode($input, $this->getToken());;
     }
 }

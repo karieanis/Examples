@@ -1,6 +1,8 @@
 <?php
 namespace Examples\HiveTransformETL\Component\Serializer;
 
+use Examples\HiveTransformETL\Encoder\TokenizedEncoder;
+
 /**
  * A serialization implementation utilising tokens
  * @author Jeremy Rayner <jeremy@davros.com.au>
@@ -12,7 +14,19 @@ class TokenizedSerializer implements ISerializer {
      * @var string
      */
     protected $token;
+    /**
+     * 
+     * @var TokenizedEncoder
+     */
+    protected $encoder;
 
+    /**
+     * Constructor
+     */
+    public function __construct() {
+        $this->encoder = TokenizedEncoder::instance();
+    }
+    
     /**
      * 
      * @return \Examples\HiveTransformETL\Component\Serializer\TokenizedSerializer
@@ -43,6 +57,6 @@ class TokenizedSerializer implements ISerializer {
      * @see \Examples\HiveTransformETL\Component\Serializer\ISerializer::serialize()
      */
     public function serialize($input) {
-        return implode($this->getToken(), $input);
+        return $this->encoder->encode($input, $this->getToken());
     }
 }

@@ -2,7 +2,7 @@
 namespace Examples\ThriftServices\Thrift\Service;
 
 /**
- * Factory class used to abstract the construction of Thrift Service Container objects form client code. At the moment,
+ * Factory class used to abstract the construction of Thrift Service Container objects from client code. At the moment,
  * this only generates an object based on a pre-defined configuration, however, we should be able to migrate this to a
  * build at runtime model later on without any impact on the client code which depends on the containers it generates.
  * 
@@ -53,12 +53,10 @@ class Factory {
         $transport = $ServiceWrapper->getTransport($transportClass, $configuration);
         $protocol = $ServiceWrapper->getProtocol("TBinaryProtocolAccelerated", $transport);
         
-        $ServiceClass = $ServiceWrapper->getServiceClass();
-        $client = new $ServiceClass($protocol);
-        
+        $ServiceClass = $ServiceWrapper->getServiceClass();       
         $container->setTransport($transport)
             ->setProtocol($protocol)
-            ->setClient($client);
+            ->setClient(new $ServiceClass($protocol));
         
         return $container;
     }

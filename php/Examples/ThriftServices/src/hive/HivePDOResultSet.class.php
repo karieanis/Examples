@@ -64,8 +64,7 @@ class HivePDOResultSet implements \Iterator, \Countable {
      * @codeCoverageIgnore
      */
     public function next() {
-        next($this->rows);
-        return $this->_getRow();
+        return next($this->rows);
     }
     
     /**
@@ -74,7 +73,6 @@ class HivePDOResultSet implements \Iterator, \Countable {
      */
     public function rewind() {
         reset($this->rows);
-        return $this->_getRow();
     }
     
     /**
@@ -113,9 +111,9 @@ class HivePDOResultSet implements \Iterator, \Countable {
         $keys = $this->getKeyMap()->get();
         $properties = $this->getPropertyMap()->get();
 
-        /* @var \TRow $row */
+        /* @var \apache\hive\service\cli\thrift\TRow $row */
         if($row = current($this->rows)) {
-            /* @var \TColumnValue $col */
+            /* @var \apache\hive\service\cli\thrift\TColumnValue $col */
             foreach($row->colVals as $pos => $col) {
                 $outRow[$keys[$pos]] = $col->{$properties[$pos]}->value;  
             }

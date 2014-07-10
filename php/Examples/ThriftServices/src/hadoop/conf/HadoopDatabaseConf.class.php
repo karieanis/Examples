@@ -6,59 +6,51 @@ namespace Examples\ThriftServices\Hadoop\Conf;
  * @author Jeremy Rayner <jeremy@davros.com.au>
  * @codeCoverageIgnore
  */
-abstract class HadoopDatabaseConf implements \ArrayAccess {
-    /**
-     * Container for configurations
-     * @var array
-     */
-    protected $vars = array();
-    
+abstract class HadoopDatabaseConf extends \Examples\ThriftServices\Conf\BaseConf {
     /**
      * Constructor
      * @codeCoverageIgnore
      */
     public final function __construct() {
-        $this->applyDefaults();
-        $this->applyOverlay();
+        $this->applyThriftConf();
+        $this->applyServiceConf();
+    }
+        
+    /**
+     * Apply thrift level configs to this config object
+     * @return void
+     */
+    protected function applyThriftConf() {
+        foreach($this->getThriftConf() as $key => $value) {
+            $this[$key] = $value;
+        }
     }
     
     /**
-     * 
-     * @see ArrayAccess::offsetExists()
+     * Apply service specific configs to this config object. This method should be
+     * overriden by concrete service conf objects
+     * @return void
      */
-    public function offsetExists($offset) {
-        return isset($this->vars[$offset]);
-    }
-    
-    /**
-     * 
-     * @see ArrayAccess::offsetGet()
-     */
-    public function offsetGet($offset) {
-        return $this->offsetExists($offset) ? $this->vars[$offset] : null;
-    }
-    
-    /**
-     * 
-     * @see ArrayAccess::offsetSet()
-     */
-    public function offsetSet($offset, $value) {
-        $this->vars[$offset] = $value;
-    }
-    
-    /**
-     * 
-     * @see ArrayAccess::offsetUnset()
-     */
-    public function offsetUnset($offset) {
-        unset($this->vars[$offset]);
-    }
-    
-    protected function applyDefaults() {
+    protected function applyServiceConf() {
         
     }
+
+    /**
+     * Get the current thrift configuration
+     * @final
+     * @return \Examples\ThriftServices\Thrift\Conf\ThriftConf
+     */
+    protected final function getThriftConf() {
+        return new \Examples\ThriftServices\Thrift\Conf\ThriftConf();
+    }
     
-    protected function applyOverlay() {
-        
+    /**
+     * Get an application config object. Entry point to reading yaml conf files
+     * @final
+     * @return \Director\Lib\Tools\Config
+     * @codeCoverageIgnore
+     */
+    protected final function getConfig() {
+        return new \Director\Lib\Tools\Config;
     }
 }

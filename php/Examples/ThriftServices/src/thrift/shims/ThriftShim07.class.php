@@ -128,7 +128,7 @@ class ThriftShim07 extends ThriftShim {
      */
     public function initialize() {
         // this is required for the auto generated thrift API
-        $GLOBALS['THRIFT_ROOT'] = LIB_ROOT . "/vendor/thrift/" . static::VERSION;
+        $GLOBALS['THRIFT_ROOT'] = LIB_ROOT . "/vendor/thrift/" . static::getVersion();
 
         static::$paths = array(
             "root" => $GLOBALS['THRIFT_ROOT'],

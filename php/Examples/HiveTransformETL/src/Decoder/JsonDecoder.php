@@ -34,7 +34,10 @@ class JsonDecoder implements IDecoder {
         $decoded = json_decode($value, $assoc);
 
         if(($errCode = json_last_error()) !== JSON_ERROR_NONE) {
-            throw new DecodeException(static::$errors[$errCode], $errCode);
+            throw new DecodeException(
+                    static::$errors[$errCode] . ": " . $value, 
+                    $errCode
+            );
         }
         
         return $decoded;

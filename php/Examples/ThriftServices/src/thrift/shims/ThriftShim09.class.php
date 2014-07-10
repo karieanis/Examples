@@ -92,7 +92,7 @@ class ThriftShim09 extends ThriftShim {
      * @see \Examples\ThriftServices\Thrift\Shims\ThriftShim::initialize()
      */
     public function initialize() {
-        $thriftRoot = LIB_ROOT . "/vendor/thrift/" . static::VERSION;
+        $thriftRoot = LIB_ROOT . "/vendor/thrift/" . static::getVersion();
         $thriftPackageRoot = $thriftRoot . "/packages";
         $thriftLibraryRoot = $thriftRoot . "/lib";
         

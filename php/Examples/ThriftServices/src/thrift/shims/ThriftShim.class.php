@@ -2,22 +2,13 @@
 namespace Examples\ThriftServices\Thrift\Shims;
 
 /**
- * Base Thrift shim. This is used to ensure compatibility between different version of thrift with client code
- * which utilises Thrift. Only one shim can be registered at any specific time.
+ * Base Thrift shim. This is used to ensure compatibility between different version of thrift with our client code
+ * which utilises Thrift. Multiple shims can be registered at any specific time.
  * 
  * @author Jeremy Rayner <jeremy@davros.com.au>
  * @codeCoverageIgnore
  */
 abstract class ThriftShim {
-    /**
-     * @var boolean
-     */
-    private static $isRegistered;
-    /**
-     * @var boolean
-     */
-    private static $shim;
-    
     /**
      * 
      * @var \Logger
@@ -27,13 +18,18 @@ abstract class ThriftShim {
     /**
      * Protected constructor, prevents instantiation from outside of this class
      */
-    protected final function __construct() {
-        $this->setLogger(\Logger::getLogger("ThriftDatabaseLogger"));
+    public final function __construct() {
+        $this->setLogger(\Logger::getLogger("servicesLogger"));
     }
     
+    /**
+     * @return string
+     */
     abstract public function getPackagesPath();
+    /**
+     * @return string
+     */
     abstract public function getRootPath();
-    
     /**
      * Generate a transport object using this shim
      * @abstract
@@ -54,43 +50,30 @@ abstract class ThriftShim {
      */
     abstract public function initialize();
     
+    /**
+     * @final
+     * @param \Logger $logger
+     * @return \Examples\ThriftServices\Thrift\Shims\ThriftShim
+     */
     protected final function setLogger(\Logger $logger) {
         $this->logger = $logger;
         return $this;
     }
     
+    /**
+     * @final
+     * @return \Logger
+     */
     protected final function getLogger() {
         return $this->logger;
     }
     
     /**
-     * Register the current shim
+     * @final
      * @static
-     * @throws ThriftShimException
+     * @return string
      */
-    public final static function register() {
-        if(!self::$isRegistered) {
-            $impl = new static();
-            $impl->initialize();
-            $impl->getLogger()->info(sprintf("Registering thrift shim class %s", get_class($impl)));
-            
-            self::$isRegistered = true;
-            self::$shim = $impl;
-        } else {
-            throw new ThriftShimException(
-                sprintf(
-                    "%s is currently registered as the running thrift shim and cannot be changed", 
-                    get_class(static::getShim())
-                )
-            );
-        }
-    }
-    
-    /**
-     * Get the registered shim
-     * @return \Examples\ThriftServices\Thrift\Shims\ThriftShim
-     */
-    public final static function getShim() {
-        return self::$shim;
+    public final static function getVersion() {
+        return static::VERSION;
     }
 }

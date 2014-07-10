@@ -360,7 +360,7 @@ abstract class TSaslTransport extends TTransport {
     /* 
      * @see \Thrift\Transport\TTransport::isOpen()
      */
-    public function isOpen() {
+    public function isOpen() { 
         return $this->transport->isOpen() && $this->client->isComplete();
     }
 }

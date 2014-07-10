@@ -35,13 +35,11 @@ class ClassBuilder {
         if(isset($config['factory']) && ($factoryCfg = $config['factory'])) {
             $factory = $factoryCfg['class'];     // get the factory class name
             $method  = $factoryCfg['method'];    // get the method to invoke
-            
-            $this->logger->debug(sprintf("Create object %s using factory method %s", $className, $factory . "::" . $method));
-            
+
             try {
                 $invoker = new \ReflectionMethod($factory, $method);
                 $obj = $invoker->invoke(null, $className); // assumes the factory method is static
-            } catch(\ReflectionException $e) {
+            } catch(\Exception $e) {
                 // @codeCoverageIgnoreStart
                 $this->logger->error($e->getMessage(), $e);
                 throw $e;
@@ -60,14 +58,17 @@ class ClassBuilder {
                         $value = $arg;
                     }
             
-                    array_push($args, $value); // add the argument to the list of arguments
+                    $args[] = $value; // add the argument to the list of arguments
                 }
             }
-            
-            $this->logger->debug(sprintf("Constructing object %s using reflection", $className));
-            
+                        
             try {
-                $obj = $reflector->newInstanceArgs($args); // construct the new instance with the arguments provided
+                // this is for backwards compatibility - some versions of the reflection API don't like invocations with empty arguments
+                if(count($args) > 0) {
+                    $obj = $reflector->newInstanceArgs($args); // construct the new instance with the arguments provided
+                } else {
+                    $obj = $reflector->newInstance();
+                }
             } catch(\ReflectionException $e) {
                 // @codeCoverageIgnoreStart
                 $this->logger->error($e->getMessage(), $e);
@@ -89,16 +90,14 @@ class ClassBuilder {
 
                 if(isset($data['setter'])) {
                     $setter = $data['setter'];
-                    
-                    $this->logger->debug(sprintf("Invoking setter %s on %s with arguments %s", $setter, $className, var_export($value, true)));
-                    
+
                     /* @var $setterFn \ReflectionMethod */
                     try {
                         $setterFn = $reflector->getMethod($setter);
                         $setterFn->invoke($obj, $value);
                     } catch(\Exception $e) {
                         // @codeCoverageIgnoreStart
-                        throw new \Exception(sprintf("Unable to invoke setter %s on %s", $setter, get_class($obj)), 0, $e);
+                        throw new \Exception(sprintf("Unable to invoke setter %s on %s", (string)$setter, (string)get_class($obj)), 0, $e);
                         // @codeCoverageIgnoreEnd
                     }
                 }

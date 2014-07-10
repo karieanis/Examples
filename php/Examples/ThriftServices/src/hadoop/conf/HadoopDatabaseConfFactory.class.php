@@ -24,8 +24,12 @@ final class HadoopDatabaseConfFactory {
      */
     protected function __construct() {}
     
+    protected static function getLogger() {
+        return \Logger::getLogger('servicesLogger');
+    }
+    
     /**
-     * Register the passed class string as the configuration class to use for generating HiveConf objects. Class
+     * Register the passed class string as the configuration class to use for generating configuration objects. Class
      * must extend from \Examples\ThriftServices\Hadoop\Conf\HadoopDatabaseConf
      * 
      * @param string $confClass
@@ -44,13 +48,18 @@ final class HadoopDatabaseConfFactory {
                     )
                 );
             }
-            
         } catch(\Exception $e) { // could be a ReflectionException or InvalidArgumentException
             throw $e;
         }
         
-        \Logger::getLogger('ThriftDatabaseLogger')->info(sprintf("Registering conf class %s", $confClass));
+        static::getLogger()->info(sprintf("Registering conf class %s", $confClass));
         static::$confClass = $confClass;
+    }
+    
+    public static function deregister() {
+        if(!is_null(static::$confClass)) {
+            static::$confClass = null;
+        }
     }
 
     /**
@@ -58,6 +67,7 @@ final class HadoopDatabaseConfFactory {
      * class has not been registered.
      * 
      * @throws HadoopDatabaseConfFactoryException
+     * @throws InvalidConfException
      * @return \Examples\ThriftServices\Hadoop\Conf\HadoopDatabaseConf
      */
     public static function factory() {
@@ -66,6 +76,54 @@ final class HadoopDatabaseConfFactory {
         }
         
         $instance = new static::$confClass;
+        $validator = \Examples\ThriftServices\Hadoop\Conf\Validator\HadoopDatabaseConfValidatorFactory::factory($instance);
+        
+        if(!$validator->validate($instance)) {
+            throw new InvalidConfException(
+                sprintf(
+                    "Conf class %s is invalid. The following errors have been detected: %s",
+                    get_class($instance), implode(", ", $validator->getErrors())        
+                )        
+            );
+        }
+        
+        return $instance;
+    }
+    
+    /**
+     * 
+     * @param string $ConfClass
+     * @throws \InvalidArgumentException
+     * @throws \Exception
+     * @throws \InvalidConfException
+     * @return \Examples\ThriftServices\Conf\BaseConf
+     */
+    public static function create($ConfClass) {
+        try {
+            $reflector = new \ReflectionClass($ConfClass);
+        
+            if(!$reflector->isSubclassOf(static::$baseConfClass)) {
+                throw new \InvalidArgumentException(
+                    sprintf("%s does not extend from required base class %s", $ConfClass, static::$baseConfClass)
+                );
+            }
+        } catch(\Exception $e) { // could be a ReflectionException or InvalidArgumentException
+            throw $e;
+        }
+        
+        $instance = new $ConfClass;
+        $validator = \Examples\ThriftServices\Hadoop\Conf\Validator\HadoopDatabaseConfValidatorFactory::factory($instance);
+        
+        if(!$validator->validate($instance)) {
+            throw new InvalidConfException(
+                sprintf(
+                    "Conf class %s is invalid. The following errors have been detected: %s",
+                    get_class($instance), implode(", ", $validator->getErrors())
+                )
+            );
+        }
+        
+        static::getLogger()->info(sprintf("Conf object %s created", get_class($instance)));
         return $instance;
     }
 }

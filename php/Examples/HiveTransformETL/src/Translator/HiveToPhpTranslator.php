@@ -33,8 +33,8 @@ class HiveToPhpTranslator implements IHiveTranslator {
         
         // for each item in the row
         foreach($row as $key => $value) {
-            if(in_array($row[$key], $translatable)) { // see if there is a translation
-                $row[$key] = $dictionary[$row[$key]]; // translate if there is
+            if(in_array($value, $translatable, true)) { // see if there is a translation
+                $row[$key] = $dictionary[$value]; // translate if there is
             }
         }
         

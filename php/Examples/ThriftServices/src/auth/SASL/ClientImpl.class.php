@@ -14,7 +14,7 @@ class ClientImpl implements Client {
     protected $mechanism;
     /**
      * Property collection
-     * @var \Director\Lib\Util\Collection
+     * @var \Examples\ThriftServices\Util\Collection
      */
     protected $properties;
     

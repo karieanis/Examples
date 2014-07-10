@@ -1,12 +1,14 @@
 <?php
 namespace Examples\HiveTransformETL\Component;
 
+use \Examples\HiveTransformETL\Exception\StreamReadException;
+
 /**
  * Stream based reader
  * @author Jeremy Rayner <jeremy@davros.com.au>
  * @codeCoverageIgnore
  */
-class Reader extends Streamable {
+class Reader extends Streamable implements IReader {
     /**
      * @var resource
      */
@@ -22,21 +24,26 @@ class Reader extends Streamable {
 
     /**
      * Open a read resource to the stream for this object
+     * @throws StreamReadException
      */
     public function open() {
-        $this->pointer = fopen($this->getStream(), "r");
+        if(!($this->pointer = @fopen($this->getStream(), "r"))) {
+            throw new StreamReadException(
+                    "Unable to open stream " . $this->getStream() . " for read operations",
+                    0
+            );
+        }
     }
     
-    /**
-     * Read from the open stream
-     * @return string
+    /* (non-PHPdoc)
+     * @see \Examples\HiveTransformETL\Component\IReader::read()
      */
     public function read() {
         if(is_null($this->pointer)) {
            $this->open();
         }
         
-        return stream_get_line($this->pointer, 8192, PHP_EOL);
+        return stream_get_line($this->pointer, 65535, PHP_EOL);
     }
     
     /**

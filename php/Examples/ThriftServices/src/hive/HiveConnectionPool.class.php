@@ -5,7 +5,7 @@ namespace Examples\ThriftServices\Hive;
  * Simple connection pool singleton class
  * @author Jeremy Rayner <jeremy@davros.com.au>
  */
-class HiveConnectionPool {
+final class HiveConnectionPool extends \Examples\ThriftServices\Pool\BasePool {
     /**
      * 
      * @var HiveConnectionPool
@@ -14,20 +14,15 @@ class HiveConnectionPool {
     
     /**
      * 
-     * @var \Logger
-     */
-    protected $logger;
-    /**
-     * 
      * @var array
      */
-    protected $pool = array();
+    protected static $pool = array();
 
     /**
      * Constructor
      */
     protected function __construct() {
-        $this->setLogger(\Logger::getLogger("ThriftDatabaseLogger"));
+        $this->setLogger(\Logger::getLogger('servicesLogger'));
     }
     
     /**
@@ -39,6 +34,10 @@ class HiveConnectionPool {
         }
         
         return static::$instance;
+    }
+    
+    public function &getPoolMap() {
+        return static::$pool;
     }
     
     /**
@@ -74,7 +73,7 @@ class HiveConnectionPool {
         $hashKey = md5(implode(".", array($class, $host, $port, $database)));
         
         // connection is cached in the pool
-        if(isset($this->pool[$hashKey])) {
+        if(isset(static::$pool[$hashKey])) {
             $this->getLogger()->debug(
                 sprintf(
                     "Connection %s[host=%s, port=%s, database=%s] retrieved from pool",
@@ -82,7 +81,7 @@ class HiveConnectionPool {
                 )
             );
             
-            $connection = $this->pool[$hashKey];
+            $connection = static::$pool[$hashKey];
         } else { // no connection found, instantiate and add to the pool
             $this->getLogger()->debug(
                 sprintf(
@@ -91,7 +90,7 @@ class HiveConnectionPool {
                 )        
             );
             
-            $this->pool[$hashKey] = $connection = new $class($host, $port, $database);
+            static::$pool[$hashKey] = $connection = new $class($host, $port, $database);
         }
         
         return $connection;

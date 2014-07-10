@@ -22,7 +22,7 @@ class TSaslTransportFactory {
      * @throws \InvalidArgumentException
      */
     public static function factory(\Thrift\Transport\TTransport $transport, $mechanismName, $username, $password) {
-        if($mechanismName == \Examples\ThriftServices\Auth\SASL\Mechanism\BaseMechanism::NOSASL) {
+        if(is_null($mechanismName) || $mechanismName == \Examples\ThriftServices\Auth\SASL\Mechanism\BaseMechanism::NOSASL) {
             return $transport;
         }
 
@@ -45,7 +45,7 @@ class TSaslTransportFactory {
         }
         
         $transport = new TSaslClientTransport($transport, $sasl);
-        $transport->setLogger(\Logger::getLogger("ThriftDatabaseLogger"));
+        $transport->setLogger(\Logger::getLogger("servicesLogger"));
         return $transport;
     }
 }

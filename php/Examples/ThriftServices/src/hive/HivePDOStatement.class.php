@@ -16,7 +16,7 @@ class HivePDOStatement {
     protected $fetch_style = null;
     /**
      * HiveServer2 operation handle
-     * @var \TOperationHandle
+     * @var \apache\hive\service\cli\thrift\TOperationHandle
      */
     protected $operationHandle;
     /**
@@ -70,7 +70,7 @@ class HivePDOStatement {
      * @param HivePDO $pdo
      */
     public function __construct(HivePDO $pdo) {
-        $this->logger = \Logger::getLogger('ThriftDatabaseLogger');
+        $this->logger = \Logger::getLogger('servicesLogger');
         $this->setPDO($pdo);  
     }
     
@@ -90,15 +90,15 @@ class HivePDOStatement {
         $result = true;
 
         $query = $this->queryString;
-        $request = new \TExecuteStatementReq(array('statement' => $query));
+        $request = new \apache\hive\service\cli\thrift\TExecuteStatementReq(array('statement' => $query));
 
         try {
-            /* @var $response \TExecuteStatementResp */
+            /* @var $response \apache\hive\service\cli\thrift\TExecuteStatementResp */
             $response = $this->call('ExecuteStatement', $request);
             $this->operationHandle = $response->operationHandle;
         } catch(\Exception $e) {
-            $result = false;
             $this->logger->error($e->getMessage(), $e);
+            throw $e;
         }
         
         return $result;
@@ -210,10 +210,10 @@ class HivePDOStatement {
      */
     public function close() {
         if($this->isOpen()) {
-            $request = new \TCloseOperationReq(array('operationHandle' => $this->operationHandle));
+            $request = new \apache\hive\service\cli\thrift\TCloseOperationReq(array('operationHandle' => $this->operationHandle));
     
             try {
-                /* @var $response \TCloseOperationResp */
+                /* @var $response \apache\hive\service\cli\thrift\TCloseOperationResp */
                 $response = $this->call('CloseOperation', $request);
             } catch(\Examples\ThriftServices\Hive\HivePDOException $e) {
                 throw $e;
@@ -297,18 +297,18 @@ class HivePDOStatement {
      */
     public function __toString() {
         return sprintf(__CLASS__ . " [opType=%s, statement=%s]",
-                $this->isOpen() ? \TOperationType::$__names[$this->operationHandle->operationType] : "N/A",
+                $this->isOpen() ? \apache\hive\service\cli\thrift\TOperationType::$__names[$this->operationHandle->operationType] : "N/A",
                 str_replace(array("\n","\r", "\n\r", "\t"), " ", $this->queryString));
     }
     
     /**
      * Creates an error info array based on the passed TStatus object.
      * @static
-     * @param \TStatus $status
+     * @param \apache\hive\service\cli\thrift\TStatus $status
      * @return array
      * @codeCoverageIgnore
      */
-    protected static function createErrorInfo(\TStatus $status) {
+    protected static function createErrorInfo(\apache\hive\service\cli\thrift\TStatus $status) {
         return array(
                 $status->sqlState,
                 $status->errorCode,
@@ -327,14 +327,14 @@ class HivePDOStatement {
      */
     protected function _fetch() {
         $schema = null;
-        $request = new \TFetchResultsReq(array(
+        $request = new \apache\hive\service\cli\thrift\TFetchResultsReq(array(
                 'operationHandle' => $this->operationHandle,
-                'orientation' => \TFetchOrientation::FETCH_NEXT,
+                'orientation' => \apache\hive\service\cli\thrift\TFetchOrientation::FETCH_NEXT,
                 'maxRows' => $this->getFetchSize()
             )
         );
     
-        /* @var $response \TFetchResultsResp */
+        /* @var $response \apache\hive\service\cli\thrift\TFetchResultsResp */
         $response = $this->call('FetchResults', $request);
         $rows = $response->results->rows;
     
@@ -346,9 +346,9 @@ class HivePDOStatement {
             // schema is not currently defined
             if(is_null($schema = $this->schema)) {
                 $schema = new Meta\Schema();
-                $request = new \TGetResultSetMetadataReq(array('operationHandle' => $this->operationHandle));
+                $request = new \apache\hive\service\cli\thrift\TGetResultSetMetadataReq(array('operationHandle' => $this->operationHandle));
     
-                /* @var $response \TGetResultSetMetadataResp */
+                /* @var $response \apache\hive\service\cli\thrift\TGetResultSetMetadataResp */
                 $response = $this->call('GetResultSetMetadata', $request);
                 $schema->setKeyMap(Meta\KeyMap::factory($response->schema))
                     ->setPropertyMap(Meta\PropertyMap::factory(current($rows)));
@@ -493,7 +493,7 @@ class HivePDOStatement {
         }
         
         // fail, throw exception
-        if($response->status->statusCode == \TStatusCode::ERROR_STATUS) {
+        if($response->status->statusCode == \apache\hive\service\cli\thrift\TStatusCode::ERROR_STATUS) {
             $this->setErrorCode($response->status->errorCode)
                 ->setErrorInfo(($info = static::createErrorInfo($response->status)));
 
